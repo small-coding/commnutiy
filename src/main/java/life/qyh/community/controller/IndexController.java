@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @Controller
@@ -20,12 +21,8 @@ public class IndexController {
 
     @Resource
     private UserMapper userMapper;
-
     @Resource
-    private QuestionMapper questionMapper;
-
-    @Resource
-    private QuestionService QuestionService;
+    private QuestionService questionService;
 
     @GetMapping("/")
     public String index (HttpServletRequest request,
@@ -37,16 +34,14 @@ public class IndexController {
                 if ("token".equals(cookie.getName())) {
                     String token = cookie.getValue();
                     User user = userMapper.findByToken(token);
-                    if (user != null) {
-                        request.getSession().setAttribute("user", user);
-                    }
+                    request.getSession().setAttribute("user", user);
                     break;
                 }
             }
         }
-        List<QuestionDTO> questionDTOList = QuestionService.selList(currentPage, size);
+        List<QuestionDTO> questionDTOList = questionService.selList(currentPage, size);
         request.setAttribute("questionDTOList", questionDTOList);
-        request.setAttribute("pageInfo", QuestionService.pageInfo);
+        request.setAttribute("pageInfo", questionService.pageInfo);
         return "index";
     }
 

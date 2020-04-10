@@ -54,6 +54,7 @@ public class AuthorizeController {
             user.setAvatar_url(githubUser.getAvatar_url());
             userMapper.insertUser(user);
             response.addCookie(new Cookie("token", token));
+//            request.getSession().setAttribute("user", user);
         } else {
             //登录失败，重新登录
         }

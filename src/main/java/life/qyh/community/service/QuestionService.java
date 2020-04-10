@@ -26,7 +26,7 @@ public class QuestionService {
 
     public List<QuestionDTO> selList (int currentPage, int size) {
         int totalCount = questionMapper.selCount();
-        int totalPage = totalCount % size == 0 ? totalCount / size : totalCount / size + 1;
+        int totalPage = totalPageCalc(totalCount, size);
         if (currentPage < 1) {
             currentPage = 1;
         } else if (currentPage > totalPage) {
@@ -74,7 +74,11 @@ public class QuestionService {
             pageInfo.setPreviousPage(true);
         }
         if (currentPage == totalPage) {
-            pageInfo.setPreviousPage(true);
+            if (currentPage != 1) {
+                pageInfo.setPreviousPage(true);
+            } else {
+                pageInfo.setPreviousPage(false);
+            }
             pageInfo.setEndPage(false);
             pageInfo.setAfterPage(false);
         } else {
@@ -92,4 +96,30 @@ public class QuestionService {
         }
     }
 
+    public List<QuestionDTO> selList(User user, int currentPage, int size) {
+        int totalCount = questionMapper.selById (user.getAccount_id());
+        int totalPage = totalPageCalc(totalCount, size);
+        if (currentPage < 1) {
+            currentPage = 1;
+        } else if (currentPage > totalPage) {
+            currentPage = totalPage;
+        }
+        int offset = (currentPage - 1) * size;
+        List<Question> questionList = questionMapper.selByIdPage(user.getAccount_id(), offset, size);
+        List<QuestionDTO> questionDTOList = new ArrayList<>();
+        for (Question question : questionList) {
+            QuestionDTO questionDTO = new QuestionDTO();
+            BeanUtils.copyProperties(question, questionDTO);
+            questionDTO.setUser(user);
+            questionDTOList.add(questionDTO);
+        }
+        pageInfo.setQuestionDTOList(questionDTOList);
+        pageInfo.setPage(currentPage);
+        setPage(totalCount, size, currentPage, totalPage);
+        return questionDTOList;
+    }
+
+    public int totalPageCalc (int totalCount, int size) {
+        return totalCount % size == 0 ? totalCount / size : totalCount / size + 1;
+    }
 }

@@ -47,20 +47,7 @@ public class PublishController {
             request.setAttribute("error", "标签不能为空");
             return "publish";
         }
-        Cookie[] cookies = request.getCookies();
-        User user = null;
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("token".equals(cookie.getName())) {
-                    String token = cookie.getValue();
-                    user = userMapper.findByToken(token);
-                    if (user != null) {
-                        request.getSession().setAttribute("user", user);
-                    }
-                    break;
-                }
-            }
-        }
+        User user = (User) request.getSession().getAttribute("user");
         if (user == null) {
             request.setAttribute("error", "用户未登录");
             return "publish";
@@ -69,7 +56,7 @@ public class PublishController {
         question.setTitle(title);
         question.setDescription(description);
         question.setTag(tag);
-        question.setCreator(user.getId());
+        question.setCreator(user.getAccount_id());
         question.setGmt_create(System.currentTimeMillis());
         question.setGmt_modified(question.getGmt_create());
         questionMapper.insertQuestion(question);

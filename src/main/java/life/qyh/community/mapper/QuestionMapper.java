@@ -1,5 +1,6 @@
 package life.qyh.community.mapper;
 
+import com.sun.scenario.effect.Offset;
 import life.qyh.community.model.Question;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
@@ -22,4 +23,10 @@ public interface QuestionMapper {
 
     @Select("select count(1) from question")
     int selCount ();
+
+    @Select("select count(1) from question where creator=#{creator}")
+    int selById(@Param("creator") String creator);
+
+    @Select("select * from question where creator=#{creator} limit #{offset}, #{size}")
+    List<Question> selByIdPage(@Param("creator") String creator, @Param("offset") int offset, @Param("size") int size);
 }
