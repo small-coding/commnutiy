@@ -1,11 +1,14 @@
 package life.qyh.community.controller;
 
+import life.qyh.community.dto.QuestionDTO;
 import life.qyh.community.mapper.QuestionMapper;
 import life.qyh.community.mapper.UserMapper;
 import life.qyh.community.model.Question;
 import life.qyh.community.model.User;
+import life.qyh.community.service.QuestionService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -22,8 +25,22 @@ public class PublishController {
     @Resource
     private QuestionMapper questionMapper;
 
+    @Resource
+    private QuestionService questionService;
+
     @GetMapping("/publish")
     public String publish () {
+        return "publish";
+    }
+
+    @GetMapping("/publish/{id}")
+    public String updateQuestion (@PathVariable("id") int id,
+                                  HttpServletRequest request) {
+        QuestionDTO question = questionService.getById(id);
+        request.setAttribute("title", question.getTitle());
+        request.setAttribute("description", question.getDescription());
+        request.setAttribute("tag", question.getTag());
+        request.setAttribute("id", id);
         return "publish";
     }
 
@@ -31,6 +48,7 @@ public class PublishController {
     public String doPublish (@RequestParam("title") String title,
                              @RequestParam("description") String description,
                              @RequestParam("tag") String tag,
+                             @RequestParam(value = "id") String id,
                              HttpServletRequest request) {
         request.setAttribute("title", title);
         request.setAttribute("description", description);
@@ -59,7 +77,12 @@ public class PublishController {
         question.setCreator(user.getAccount_id());
         question.setGmt_create(System.currentTimeMillis());
         question.setGmt_modified(question.getGmt_create());
-        questionMapper.insertQuestion(question);
+        if (id == null || "".equals(id)) {
+            questionService.createOrUpdateQuestion(0, question);
+        } else {
+            questionService.createOrUpdateQuestion(Integer.parseInt(id), question);
+        }
+//        questionMapper.insertQuestion(question);
         return "redirect:/";
     }
 

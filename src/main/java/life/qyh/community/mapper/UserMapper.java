@@ -1,10 +1,7 @@
 package life.qyh.community.mapper;
 
 import life.qyh.community.model.User;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -18,6 +15,9 @@ public interface UserMapper {
     @Select("select * from user where token=#{token}")
     User findByToken(@Param("token") String token);
 
-    @Select("select * from user where account_id=#{creator} order by id desc limit 0, 1")
+    @Select("select * from user where account_id=#{creator}")
     User findById(@Param("creator") String creator);
+
+    @Update("update user set name=#{name}, token=#{token}, gmt_modified=#{gmt_modified}, avatar_url=#{avatar_url} where id=#{id}")
+    void updateUser(User user);
 }

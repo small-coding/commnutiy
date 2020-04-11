@@ -5,6 +5,7 @@ import life.qyh.community.dto.GithubUser;
 import life.qyh.community.mapper.UserMapper;
 import life.qyh.community.model.User;
 import life.qyh.community.provider.GithubProvider;
+import life.qyh.community.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +30,8 @@ public class AuthorizeController {
     private GithubProvider githubProvider;
     @Resource
     private UserMapper userMapper;
+    @Resource
+    private UserService userService;
     @GetMapping("/callback")
     public String callback (@RequestParam(name = "code") String code,
                             @RequestParam(name = "state") String state,
@@ -52,12 +55,21 @@ public class AuthorizeController {
             user.setGmt_create(System.currentTimeMillis());
             user.setGmt_modified(user.getGmt_create());
             user.setAvatar_url(githubUser.getAvatar_url());
-            userMapper.insertUser(user);
+            userService.insertOrUpdateUser(user);
             response.addCookie(new Cookie("token", token));
-//            request.getSession().setAttribute("user", user);
         } else {
             //登录失败，重新登录
         }
+        return "redirect:/";
+    }
+
+    @GetMapping("/logout")
+    public String logOut (HttpServletRequest request,
+                          HttpServletResponse response) {
+        Cookie cookie = new Cookie("token", null);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+        request.getSession().removeAttribute("user");
         return "redirect:/";
     }
 

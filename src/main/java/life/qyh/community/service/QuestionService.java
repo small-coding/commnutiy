@@ -122,4 +122,33 @@ public class QuestionService {
     public int totalPageCalc (int totalCount, int size) {
         return totalCount % size == 0 ? totalCount / size : totalCount / size + 1;
     }
+
+    public QuestionDTO getById(int id) {
+        Question question = questionMapper.getById(id);
+        QuestionDTO questionDTO = new QuestionDTO();
+        BeanUtils.copyProperties(question, questionDTO);
+        User user = userMapper.findById(question.getCreator());
+        questionDTO.setUser(user);
+        return questionDTO;
+    }
+
+    public void createOrUpdateQuestion (int id, Question question) {
+        if (id == 0) {
+            questionMapper.insertQuestion(question);
+        } else {
+            Question resultQuestion = questionMapper.selByQuestionId(id);
+            if (resultQuestion != null) {
+                resultQuestion.setGmt_modified(System.currentTimeMillis());
+                resultQuestion.setTag(question.getTag());
+                resultQuestion.setDescription(question.getDescription());
+                resultQuestion.setTitle(question.getTitle());
+                questionMapper.updateQuestion(resultQuestion);
+            }
+        }
+    }
+
+    public void setView_Count(QuestionDTO questionDTO) {
+        questionDTO.setView_count(questionDTO.getView_count() + 1);
+        questionMapper.setViewCount(questionDTO.getView_count(), questionDTO.getId());
+    }
 }
